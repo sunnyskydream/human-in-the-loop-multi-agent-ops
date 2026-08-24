@@ -141,6 +141,12 @@ What it illustrates is the coordination and evaluation layer, which is where rea
 
 **Deliberately not here yet:** a runnable implementation and an execution trace. Both are planned. When they land, the trace will be captured from an actual run — including a genuine failed review and revision — rather than hand-authored to resemble agent output. An artifact that only *looks* like a system run is worth less than no artifact at all.
 
+## Operating Notes
+
+Failure analyses from running the system: what broke, what the mechanism turned out to be, and what would prove each conclusion wrong. They document how the coordination and evaluation layer failed in practice, and which gates now exist because of it. They complement — but do not replace — the planned execution trace described above.
+
+**[Read the operating notes →](./docs/operating-notes/)**
+
 ## Provenance
 
 Built and operated as a real working system for high-volume personalized-document production, then abstracted for publication. All domain specifics, private data, and third-party names have been removed; what remains is the architecture.
