@@ -14,12 +14,12 @@ I learned this through three families of failures that initially looked unrelate
 
 The useful abstraction is that they violate three different contracts: **record isolation, claim binding, and artifact integrity**.
 
-As of 2026-08-23, 24 stable entries in the private incident registries map to these contracts:
+As of 2026-08-24, 25 stable entries in the private incident registries map to these contracts:
 
 | Contract | Registry entries |
 |---|---:|
 | Record isolation | 3 |
-| Claim binding | 10 |
+| Claim binding | 11 |
 | Artifact and state integrity | 11 |
 
 This count is not comparable to Operating Note 01's 13 timestamped incidents over 54 days. These registries were consolidated retrospectively. They support a count of observed failure entries, not a clean incident rate or elapsed-time claim; several entries describe recurring failure shapes rather than one uniquely timestamped event.
@@ -102,6 +102,10 @@ Three constraints now stay immutable during compression:
 > **Claim integrity is relational. The dangerous error is often not a false fact but a false join.**
 
 This is also why dense summaries are risky. Combining two bullets can save a line while silently changing which action produced which result. Concision is not neutral when the source contains adjacent quantified evidence.
+
+Question context creates another locality boundary. In one review, a correctly sourced scale metric from a data-quality workstream appeared inside an answer about a particular platform. The metric still described the right action, but its placement invited the listener to attach that scale to the platform. It was true, yet not admissible in that answer.
+
+The reviewer now classifies every sentence as a direct answer, necessary evidence, ownership boundary, role bridge, or tangent. A claim can pass tuple trace and still fail if its answer context changes what a listener reasonably infers.
 
 ---
 
@@ -224,7 +228,44 @@ The canaries deliberately introduce a wrong-record phrase, a metric moved betwee
 
 If any live defect escapes or any canary passes undetected, the three-contract review failed. I will report the result after fifty documents either way.
 
+### Fifty-document checkpoint — 2026-09-16
+
+The document window is complete: fifty consecutive current document packets were preserved after the baseline. Each packet contains an editable document, a rendered PDF, a regeneration source, and a review note. Forty-one of the fifty were released; seven were archived without release and two remained held.
+
+The checkpoint exposed an instrumentation gap rather than supporting a clean pass:
+
+| Test | Evidence available | Status |
+|---|---|---|
+| Cross-record evidence reaching an approved document | No confirmed live escape appears in the incident record | Not established: the full window did not receive a prospective record-isolation receipt |
+| Approved quantified or ownership claims failing full source-tuple trace | Review caught and corrected claim-binding errors, but did not preserve one trace receipt for every approved claim | Not established |
+| Released artifact diverging from approved editable or generator state | All forty-one released DOCX/PDF pairs passed a normalized alphanumeric-token comparison requiring at least 99.5% coverage in each direction under the stated extraction method | Partial: the screen does not prove rendered-layout parity or generator-state parity |
+| Known canaries for all three contracts detected before approval | No complete three-canary execution receipt exists for this window | Not established |
+
+**Parity-screen method.** The screen selected the 41 released `*_SUBMITTED.docx` files in the fifty-packet window and paired each with the PDF in the same packet directory whose filename stem matched exactly; nonmatching portfolio PDFs were excluded, which mattered in the nine directories that held one. DOCX body paragraphs were extracted in document order with python-docx 1.2.0 using `Document(...).paragraphs`. PDF pages were extracted in page order with pypdf 6.10.2 using the default `PdfReader(...).pages[i].extract_text()`. Both strings were lowercased and tokenized with the regular expression `[A-Za-z0-9]+`. Tokens were treated as multisets using `collections.Counter`; the multiset intersection was divided separately by the total DOCX-token and PDF-token counts. The observed minimum coverage was 99.76% from the DOCX side and 99.52% from the PDF side, both in the same packet. Token order, punctuation, layout, hyperlinks, and visual rendering were outside this screen. These figures were recomputed on 2026-09-16 against the versions named here, and that rerun is the authoritative measurement: the original one-off script was not retained, so its installed versions cannot be proven. A set-based rather than multiset-based intersection produces different minima on the same documents, which is why the tokenization rule is stated.
+
+The result is therefore not “zero defects across fifty documents.” It is that the workflow produced and preserved the promised window without preserving enough prospective evidence to evaluate three of the four targets as written. A clean incident log cannot substitute for a canary, and an editable/rendered text comparison cannot substitute for layout and regeneration checks.
+
+The next window needs a per-document receipt binding record identity, approved claim tuples, editable hash, rendered hash, generator hash, and canary outcome before approval. Until those receipts exist, **the contracts remain useful review rules, but the fifty-document validation claim is unproven.**
+
 ---
 
 *The workflow is human-in-the-loop by design: its stages are predefined, components are agentic, and consequential decisions remain with the human orchestrator. It is not an autonomous agent, a productized framework, or production distributed infrastructure. The repository documents the architecture rather than shipping a runnable implementation; this is an incident analysis, not an execution trace.*
 
+---
+
+## Numbers and denominators
+
+Every quantitative claim above, with what was counted and against what. Enforced mechanically before publication.
+
+**This records that a denominator was written, not that it is correct.** Whether a stated denominator matches its claim stays a human judgement.
+
+| Value | What was counted | Denominator |
+|---|---|---|
+| **100%** | Target rate for known canaries across all three contracts being detected before approval | All verification runs, not all documents. A document set containing no planted defect legitimately detects nothing, so the target is stated against controlled runs |
+| **50 documents** | Consecutive current document packets in the post-baseline checkpoint window | One current packet per record; failed intermediate builds and backup copies were excluded |
+| **41 released / 7 archived / 2 held** | Disposition of the fifty packet units at the checkpoint | All 50 finalized packets |
+| **41 released pairs** | Released DOCX/PDF pairs that passed a normalized alphanumeric-token comparison | All 41 released packets in the checkpoint window; every pair retained at least **99.5%** of the editable and rendered token inventories in each direction, but this did not test layout or regeneration equivalence |
+| **99.5%** | Minimum bidirectional token-coverage threshold used by the text-content parity screen | Each released DOCX/PDF pair independently; punctuation, layout, and token order were outside this screen |
+| **99.76% / 99.52%** | Observed minimum token coverage across the window, from the DOCX side and from the PDF side | For each pair, the directional denominators were its total DOCX-token count and total PDF-token count, respectively; the reported values are the minimum of each directional ratio across all 41 released pairs. Both minima fell in the same packet. Extraction method and library versions are stated above this block; recomputed 2026-09-16, and that rerun is the authoritative measurement |
+
+Counts of registry entries quoted in the body are absolute totals from the private incident registries at the stated date, not ratios, and carry no denominator.

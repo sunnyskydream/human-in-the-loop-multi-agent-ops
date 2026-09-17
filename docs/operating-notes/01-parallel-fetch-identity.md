@@ -20,13 +20,13 @@ I fan out seven fetches at once. Seven results come back in one block. Each one 
 
 That would be survivable if nothing ever reordered. But the next thing the agent does is *think* — sort by value, group by category, rank by priority, write the highest-scoring one first. Every reorder is a chance to break a pairing that was only ever held together by sequence.
 
-### What was never at risk
+### What the crossing did not touch
 
 Worth stating precisely, because it bounds the damage and I got this wrong at first too.
 
 The entity name and the record body **always travel together** — both are read out of the same result. So a crossing produces a record whose name, content, and score are all correct and mutually consistent. Only the pointer is wrong.
 
-**Nothing was ever mis-scored.** The scoring reads content, and content was never crossed. The harm is downstream: a pointer that sends a human to the wrong place, and an exclusion log whose pointers block the wrong future records.
+**No mis-scoring was found in the recorded incidents:** the content used for scoring remained correctly bound, while source pointers crossed downstream. That is an absence of found errors across the incident record and the checkpoint window, not a proof that none occurred anywhere. The harm is downstream: a pointer that sends a human to the wrong place, and an exclusion log whose pointers block the wrong future records.
 
 If you hit this, check whether your failure has the same shape before you go re-validating your scoring logic. You may be looking for a bug that isn't there.
 
@@ -150,6 +150,37 @@ The third test needs a controlled fixture. A normal batch containing no duplicat
 
 If a crossed pointer reaches a committed record, a record is committed twice, or the fixture passes the pre-fetch gate, the rebuild has failed its own claim. I will report the result after fifty records either way.
 
+### Fifty-record checkpoint — 2026-09-16
+
+The observation window is complete: fifty consecutive records were committed after the frozen baseline.
+
+| Test | Observed result | Status |
+|---|---:|---|
+| Crossed pointers reaching the committed set | 0 recorded | No live escape was found in the committed window |
+| Records committed twice | 0 | The fifty-record window contained no duplicate source address or duplicate record identity |
+| Known duplicate fixture blocked before fetching | Not completed at this layer | A duplicate regression was blocked later at staging, but the full pre-fetch fixture run was interrupted by the store's lock gate and was not rerun |
+
+This is not a full validation of the rebuilt gate. The live window produced no recorded identity escape or duplicate commit, but observation alone cannot show that a silent gate ran. The controlled test promised above was not completed at the pre-fetch boundary, so the checkpoint remains open on that claim.
+
+The next verification run must preserve a receipt showing that a known duplicate was presented to the pre-fetch gate, blocked before retrieval, and left every downstream store unchanged. Until that receipt exists, the strongest supported conclusion is narrower: **the live observation window was clean; the controlled pre-fetch claim remains unproven.**
+
 ---
 
 *The workflow is human-in-the-loop by design: its stages are predefined, components are agentic, and consequential decisions remain with the human orchestrator. It is not an autonomous agent, a productized framework, or production distributed infrastructure. The repository still documents the architecture rather than shipping a runnable implementation; this is an incident analysis, not an execution trace.*
+
+---
+
+## Numbers and denominators
+
+Every quantitative claim above, with what was counted and against what. Enforced mechanically before publication.
+
+**This records that a denominator was written, not that it is correct.** Whether a stated denominator matches its claim stays a human judgement — which is precisely what the errors in this note were.
+
+| Value | What was counted | Denominator |
+|---|---|---|
+| **93 of 371** | Records whose source identifier no matching pattern could read | All records in the store carrying a source pointer, at time of measurement |
+| **25%** | 93 ÷ 371 | as above |
+| **100%** | Target rate for a planted duplicate fixture being blocked before any retrieval | All verification runs, not all batches. A batch containing no duplicate legitimately blocks nothing, which is why the test uses a fixture rather than observation |
+| **50 records** | Consecutive records in the post-baseline checkpoint window | The predefined checkpoint window; each record was counted once |
+| **0 crossed pointers** | Recorded crossed-pointer escapes reaching the committed set | The 50-record checkpoint window; absence was checked against the committed tracker and incident record, not against discarded candidates |
+| **0 duplicate commits** | Duplicate source addresses or duplicate record identities in the committed set | The same 50 records |
