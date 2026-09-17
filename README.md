@@ -147,6 +147,12 @@ Failure analyses from running the system: what broke, what the mechanism turned 
 
 **[Read the operating notes →](./docs/operating-notes/)**
 
+## Method Notes
+
+Measurement contracts for selective workflows: what must be counted, which denominator makes a comparison valid, and what evidence would change the operating decision. The series moves from source density, through scoring validation, to preparation coverage.
+
+**[Read the method notes →](./docs/method-notes/)**
+
 ## Provenance
 
 Built and operated as a real working system for high-volume personalized-document production, then abstracted for publication. All domain specifics, private data, and third-party names have been removed; what remains is the architecture.
