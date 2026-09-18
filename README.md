@@ -149,7 +149,7 @@ Failure analyses from running the system: what broke, what the mechanism turned 
 
 ## Method Notes
 
-Measurement contracts for selective workflows: what must be counted, which denominator makes a comparison valid, and what evidence would change the operating decision. The series moves from source density, through scoring validation, to preparation coverage.
+Measurement contracts for selective workflows: what must be counted, which denominator makes a comparison valid, and what evidence would change the operating decision. The series covers source density and scoring validation.
 
 **[Read the method notes →](./docs/method-notes/)**
 
