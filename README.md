@@ -60,9 +60,39 @@ flowchart TD
     style OUT fill:#e6f2e9,stroke:#3d7a52
 ```
 
-**Reading the diagram.** Arrows between stages represent **workflow transitions through shared work artifacts**, not direct peer-to-peer agent conversations. Agents do not message each other — each reads and writes the blackboard, so state lives in artifacts rather than in a conversation thread. Adding or swapping an agent requires only respecting the shared contract.
+**Reading the diagram.** Arrows between processing roles represent **workflow transitions through shared artifacts**, not direct peer-to-peer conversations. Agents do not message each other — each reads and writes the blackboard, so state lives in artifacts rather than in a conversation thread. Adding or swapping an agent requires only respecting the shared contract. How the sessions hand work to each other is shown separately, in the [coordination control plane](#coordination-control-plane) below.
 
 **In marketing terms:** the *canonical rules* are the approved-claims and brand-voice source of truth. The *reasoning agent* decides segment and angle. The *polish agent* writes to voice. The *reviewer* runs claim and voice review on every asset, not a sample. The *human gate* is the approver who would have signed off anyway — now reviewing pre-validated work instead of raw drafts.
+
+### Coordination control plane
+
+The diagram above shows how an asset is produced. This one shows how the work is coordinated: which session asks for what, where that request lives, and where the human comes in.
+
+```mermaid
+flowchart LR
+    H["Human orchestrator<br/>decisions - outward-action gate"]
+
+    subgraph SESSIONS["Persistent sessions"]
+        R["Reasoning session<br/>score - frame - plan"]
+        P["Polish session<br/>voice - document production"]
+    end
+
+    subgraph BLACKBOARD["Shared state - blackboard"]
+        I[("Coordination inbox<br/>request - owner - status")]
+        W[("Shared work artifacts<br/>evidence - outputs - outcomes")]
+    end
+
+    R <-->|request - status| I
+    P <-->|request - status| I
+    R <-->|read shared - write owned| W
+    P <-->|read shared - write owned| W
+    I <-->|human-needed decision - answer| H
+
+    style H fill:#e8eef7,stroke:#31507d
+    style I fill:#f7efe3,stroke:#8a6a33
+```
+
+Two persistent sessions carry the reasoning and polish work. They do not message each other; each reads shared state and writes through its role's owner path. The blackboard carries both work state and coordination state: role-owned artifacts preserve evidence and outcomes, while the **coordination inbox** records requests, ownership, and status. Human-needed decisions return to the orchestrator, and the inbox never grants authority to publish, send, submit, or delete. [Operating Note 03](./docs/operating-notes/03-coordination-inbox.md) describes how the inbox was built and what broke on its first day.
 
 ## The Two Loops
 
@@ -73,6 +103,8 @@ flowchart TD
 - **Boundary enforcement** — prohibited or unsupported claims are explicitly blocked. The canonical layer carries can't-claim rules, not only approved facts; knowing what must *not* be said is the part naive systems miss.
 
 On a flag, the asset returns to the creator with the specific line at issue and the loop repeats. Quality never depends on any single generation being correct.
+
+The reviewer sub-agent is the workflow's evaluator against canonical evidence. Cross-model review of operating notes is a separate governance control, not an additional production stage required for every asset.
 
 This architecture can support — but never replace — the review chain used by many marketing organizations, including product-claim validation, legal review, brand review, and stakeholder approval.
 
